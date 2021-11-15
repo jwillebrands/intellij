@@ -19,6 +19,8 @@ import com.intellij.ui.IconManager;
 import com.intellij.ui.TextFieldWithStoredHistory;
 import com.intellij.usageView.UsageTreeColors;
 import com.intellij.usages.TextChunk;
+import com.intellij.vcs.log.VcsLogProperties;
+import com.intellij.vcs.log.VcsLogProperties.VcsLogProperty;
 import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -91,5 +93,14 @@ public final class BaseSdkCompat {
   /** #api212: inline into BlazeNewProjectWizard */
   public static void setContextWizard(WizardContext context, AbstractWizard<?> wizard) {
     context.putUserData(AbstractWizard.KEY, wizard);
+  }
+
+  /** #api212: inline this method. */
+  @Nullable
+  public static <T> T getIncrementalRefreshProperty(VcsLogProperty<T> property) {
+    if (property == VcsLogProperties.SUPPORTS_INCREMENTAL_REFRESH) {
+      return (T) Boolean.FALSE;
+    }
+    return null;
   }
 }
