@@ -28,6 +28,7 @@ import com.intellij.openapi.vfs.StandardFileSystems;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.io.URLUtil;
 import java.io.File;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /** A model object for something that will map to an IntelliJ library. */
@@ -89,5 +90,11 @@ public abstract class BlazeLibrary implements ProtoWrapper<ProjectData.BlazeLibr
       url += URLUtil.JAR_SEPARATOR;
     }
     return url;
+  }
+
+  /* Get lint rule jar attached with this library. Return null if it does not have any. */
+  @Nullable
+  public File getLintRuleJar(Project project, ArtifactLocationDecoder decoder) {
+    return null;
   }
 }

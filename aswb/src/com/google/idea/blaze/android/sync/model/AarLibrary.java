@@ -165,4 +165,12 @@ public final class AarLibrary extends BlazeLibrary {
         && this.aarArtifact.equals(that.aarArtifact)
         && Objects.equals(this.resourcePackage, that.resourcePackage);
   }
+
+  @Override
+  @Nullable
+  public File getLintRuleJar(Project project, ArtifactLocationDecoder decoder) {
+    UnpackedAars unpackedAars = UnpackedAars.getInstance(project);
+    File lintRuleJar = unpackedAars.getLintRuleJar(decoder, this);
+    return lintRuleJar.exists() ? lintRuleJar : null;
+  }
 }

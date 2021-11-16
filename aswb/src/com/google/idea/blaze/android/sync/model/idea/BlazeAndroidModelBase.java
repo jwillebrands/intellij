@@ -15,6 +15,7 @@
  */
 package com.google.idea.blaze.android.sync.model.idea;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.android.sdklib.AndroidVersion;
@@ -24,6 +25,11 @@ import com.android.tools.lint.detector.api.Desugaring;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.idea.blaze.base.build.BlazeBuildService;
+import com.google.idea.blaze.base.model.BlazeProjectData;
+import com.google.idea.blaze.base.projectview.ProjectViewManager;
+import com.google.idea.blaze.base.sync.data.BlazeProjectDataManager;
+import com.google.idea.blaze.base.sync.libraries.BlazeLibraryCollector;
+import com.google.idea.blaze.base.sync.workspace.ArtifactLocationDecoder;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -187,5 +193,18 @@ abstract class BlazeAndroidModelBase implements AndroidModel {
   @Override
   public Set<Desugaring> getDesugaring() {
     return desugarJava8Libs ? Desugaring.FULL : Desugaring.DEFAULT;
+  }
+
+  // @Override #api212 compat
+  @Nullable
+  Iterable<File> getLintRuleJarsOverride() {
+    BlazeProjectData blazeProjectData =
+        BlazeProjectDataManager.getInstance(project).getBlazeProjectData();
+    ArtifactLocationDecoder artifactLocationDecoder = blazeProjectData.getArtifactLocationDecoder();
+    return BlazeLibraryCollector.getLibraries(
+            ProjectViewManager.getInstance(project).getProjectViewSet(), blazeProjectData)
+        .stream()
+        .map(library -> library.getLintRuleJar(project, artifactLocationDecoder))
+        .collect(toImmutableList());
   }
 }
