@@ -30,6 +30,7 @@ import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import javax.annotation.Nullable;
+import org.jetbrains.kotlin.idea.debugger.coroutine.DebuggerListener;
 
 /** A runner that adapts the GenericDebuggerRunner to work with Blaze run configurations. */
 public class BlazeJavaDebuggerRunner extends GenericDebuggerRunner {
@@ -77,6 +78,20 @@ public class BlazeJavaDebuggerRunner extends GenericDebuggerRunner {
       return null;
     }
     BlazeJavaDebuggableRunProfileState blazeState = (BlazeJavaDebuggableRunProfileState) state;
+
+    // Register kotlin coroutines
+    // @link{org.jetbrains.kotlin.idea.debugger.coroutine.DebuggerConnection} using
+    // @link{org.jetbrains.kotlin.idea.debugger.coroutine.DebuggerListener}.
+    // DebuggerConnection checks the classpath of the project from the passed `JavaParameters` to
+    // view the Coroutines panel only if the classpath contains `kotlinx-coroutines-core` of version
+    // 1.3.8 or higher.
+    JavaParameters javaParameters = new JavaParameters();
+    javaParameters.configureByProject(
+        environment.getProject(), JavaParameters.CLASSES_AND_TESTS, /*jdk=*/ null);
+    DebuggerListener listener = environment.getProject().getService(DebuggerListener.class);
+    listener.registerDebuggerConnection(
+        blazeState.getConfiguration(), javaParameters, environment.getRunnerSettings());
+
     RemoteConnection connection = blazeState.getRemoteConnection();
     return attachVirtualMachine(state, environment, connection, POLL_TIMEOUT_MILLIS);
   }
